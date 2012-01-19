@@ -1,0 +1,47 @@
+hmenu will use huffman coding to optimally sort dmenu list entries
+
+it spawns a dmenu instance as a subprogram, and passes in an optimized
+menu list, based on past interaction. Past interaction is stored in an
+SQLite database. The schema is simple:
+
++------------+-------+
+| Menu Entry | Count |
++------------+-------+
+
+The user will pass in a database file as its first parameter, and then
+normal dmenu paramters aftwerwards.
+
+The program will pass the menu entries sorted by the count field into
+the standard input of a dmenu process that is spawned as a child
+process. It will pass in the dmenu arguments it received as well.
+
+The hmenu process will wait until the child process returns, and will
+read the child process's standard output using file redirection
+(again).
+
+If the returned menu entry is not in the database, a new row is added
+to the database. If it is in the database, its count field is
+incremented by one. 
+
+Finally, the chosen menu entry is returned as hmenu's standard output,
+mimicking dmenu.
+
+
+
+* TODO Modify tool to print the entry selected instead of immediately
+  executing it
+
+* TODO Modify tool so that if dbfile is not NULL but the file does not
+  exist on the disk, input is read like dmenu in order to initially
+  populate the db.  onlydo this if dbfile does not exist on disk. To
+  simplify this, modify the inc_item function to automatically insert
+  two items for items with spaces in them, instead of forcing the main
+  program to call the function twice. The the db initialization looks like this:
+
+  if(dbfile ! exists)
+  	    createdb(dbfile);
+	    while(lineread = readline() != EOF)
+	    	    inc_item(lineread)
+
+* TODO 
+  add support for __init__ function that will be called if the perl file exists and a menu item was returned
