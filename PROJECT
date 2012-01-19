@@ -27,21 +27,5 @@ Finally, the chosen menu entry is returned as hmenu's standard output,
 mimicking dmenu.
 
 
-
-* TODO Modify tool to print the entry selected instead of immediately
-  executing it
-
-* TODO Modify tool so that if dbfile is not NULL but the file does not
-  exist on the disk, input is read like dmenu in order to initially
-  populate the db.  onlydo this if dbfile does not exist on disk. To
-  simplify this, modify the inc_item function to automatically insert
-  two items for items with spaces in them, instead of forcing the main
-  program to call the function twice. The the db initialization looks like this:
-
-  if(dbfile ! exists)
-  	    createdb(dbfile);
-	    while(lineread = readline() != EOF)
-	    	    inc_item(lineread)
-
 * TODO 
   add support for __init__ function that will be called if the perl file exists and a menu item was returned
