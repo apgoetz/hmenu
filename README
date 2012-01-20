@@ -1,4 +1,0 @@
-To build:
-
-
-gcc -g -o hmenu hmenu.c -lsqlite3 `perl -MExtUtils::Embed -e ccopts -e ldopts`
