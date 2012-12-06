@@ -5,16 +5,14 @@
 #include <sqlite3.h>
 #include <fcntl.h>
 #include <ctype.h>
-#include <EXTERN.h>
-#include <perl.h>
 
 #define BUFFSIZE 1024
 #define DEFAULT_DMENU "/usr/bin/dmenu"
 int get_item_count(sqlite3 *dbhandler);
 void inc_item(char* item, int amount, sqlite3 *dbhandler);
-int CallFunc(char* funcname, char* funcparam);
 
-static PerlInterpreter *my_perl;
+
+
 int main(int argc, char ** argv, char **env)
 {
 	char buffer[BUFFSIZE];
@@ -25,13 +23,13 @@ int main(int argc, char ** argv, char **env)
 	int childstatus;
 	char newline = '\n';
 	char *tmpchar;
-	int perlfd;
+
 	char *dmenu_executable;
 	char *param;
 	char *stem;
 	char **newargs;
 	int i;
-	char *perlscript;
+
 	sqlite3 *dbhandler;
 	char * create_table_query = 
 		"CREATE TABLE IF NOT EXISTS hmenu"
@@ -163,36 +161,6 @@ int main(int argc, char ** argv, char **env)
 
 
 			
-			perlscript = getenv("HMENU_PERL");
-			if(perlscript && 
-			   access(perlscript,F_OK) != -1) {
-				char *perlargs[] = {"perl", perlscript};
-				PERL_SYS_INIT3(&argc,&argv,&env);
-				my_perl = perl_alloc();
-				perl_construct(my_perl);
-				perl_parse(my_perl, NULL, 2, perlargs, NULL);
-				PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
-
-				if(strcmp(stem, buffer)) {
-					param = buffer + strlen(stem) + 1;
-					inc_item(stem, 1, dbhandler);
-				} else {
-					param = "";
-				}
-				/* if we could not call the perl
-				 * function, see if file exists in
-				 * path */
-				if(CallFunc(stem, param)) {
-					printf("%s\n", buffer);
-				}
-					
-				
-				perl_destruct(my_perl);
-				perl_free(my_perl);
-				PERL_SYS_TERM();
-			}
-			else
-			{
 				if(strcmp(stem, buffer)){
 					param = buffer + strlen(stem) + 1;
 					inc_item(stem, 1, dbhandler);
@@ -203,7 +171,7 @@ int main(int argc, char ** argv, char **env)
 				{
 					printf("%s\n", buffer);
 				}
-			}
+
 
 			
 			free(tmpchar);
@@ -291,31 +259,4 @@ int get_item_count(sqlite3 *dbhandler)
 	sqlite3_finalize(statement);
 	return count;
 }
-int CallFunc(char* funcname, char* funcparam)
-{
-	dSP;
-	int count;
-	int retval;
-	ENTER;
-	SAVETMPS;
-	PUSHMARK(SP);
-	XPUSHs(sv_2mortal(newSVpv(funcparam, 0)));
-	PUTBACK;
-	count = call_pv(funcname, G_EVAL|G_DISCARD);
-	SPAGAIN;
-	/* Check the eval first */
-	/* if it is true, there was an error */
-	if (SvTRUE(ERRSV))
-	{
-		retval = -1;
-	}
-	else
-	{
-		retval = 0;
-	}
-	PUTBACK;
-	FREETMPS;
-	LEAVE;
-	return retval;
-	
-}
+
